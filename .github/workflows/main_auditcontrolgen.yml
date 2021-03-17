@@ -1,12 +1,13 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - auditcontrolgen
+name: Build and deploy ASP.Net Core app to Azure Web App - AuditControlGen
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -29,7 +30,7 @@ jobs:
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'auditcontrolgen'
+        app-name: 'AuditControlGen'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_def1298ef4d84715be37edfdb3dea67c }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_76cbe82489a840fb9bed9471c99f0483 }}
         package: ${{env.DOTNET_ROOT}}/myapp 
