@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\FinalYearProject\\FinalYearProject.csproj": {}
+    "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\Audit Controls Gen\\FinalYearProject\\FinalYearProject.csproj": {}
   },
   "projects": {
-    "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\FinalYearProject\\FinalYearProject.csproj": {
+    "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\Audit Controls Gen\\FinalYearProject\\FinalYearProject.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\FinalYearProject\\FinalYearProject.csproj",
+        "projectUniqueName": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\Audit Controls Gen\\FinalYearProject\\FinalYearProject.csproj",
         "projectName": "FinalYearProject",
-        "projectPath": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\FinalYearProject\\FinalYearProject.csproj",
+        "projectPath": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\Audit Controls Gen\\FinalYearProject\\FinalYearProject.csproj",
         "packagesPath": "C:\\Users\\leonw\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\FinalYearProject\\obj\\",
+        "outputPath": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\Audit Controls Gen\\FinalYearProject\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\leonw\\AppData\\Roaming\\NuGet\\NuGet.Config",

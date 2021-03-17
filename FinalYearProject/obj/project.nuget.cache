@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Y7+6fLzkyDWcxLB1j3gbWe2lKRb2OhdDFfYS/Vhpf2gsYSQctKKMSIOm8iubr0vaYkljCYIyxRXvqW56o3f01Q==",
+  "dgSpecHash": "4BxAy9pL+/wDact+3bcry5MxdXtkiw351vdGhiUtE9V2+TT8SiZoQgDnpUoLjSTWjH4TVvQ1SeQEFbGyfluZXA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\FinalYearProject\\FinalYearProject.csproj",
+  "projectFilePath": "C:\\Users\\leonw\\Desktop\\Uni\\Final-Year-Project\\FinalYearProject\\Audit Controls Gen\\FinalYearProject\\FinalYearProject.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\leonw\\.nuget\\packages\\azure.core\\1.4.1\\azure.core.1.4.1.nupkg.sha512",
     "C:\\Users\\leonw\\.nuget\\packages\\azure.identity\\1.2.3\\azure.identity.1.2.3.nupkg.sha512",
