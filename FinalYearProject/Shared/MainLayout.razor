@@ -1,0 +1,64 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    @* ----- TopBar Begin   ----- *@
+
+    <MudAppBar Color="Color.Primary" Fixed="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />  @*Drawer Button*@
+        <MudText Typo="Typo.h5">Audit Controls Generator</MudText>     @*Application Title*@
+        <MudAppBarSpacer/>
+        <AuthorizeView>
+            <Authorized>
+                <MudText Class="pr-4" Typo="Typo.body1"> Username: @UserName</MudText>
+            </Authorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    @* ----- TopBar End   ----- *@
+
+    @* ----- Drawer Start   ----- *@
+
+    @* ----- Drawer allows the side bar to be toggle   ----- *@
+    <MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Docked" Elevation="1">
+        <SideBarNav />
+    </MudDrawer>
+
+    @* ----- Drawer End   ----- *@
+
+    @* ----- MainContent Start   ----- *@
+
+    <MudMainContent>
+        @* -----  Div pushes the content away from the sides. Looks much better   ----- *@
+        <div class="ml-2 mt-2">
+            @Body
+        </div>
+    </MudMainContent>
+
+    @* ----- MainContent End   ----- *@
+</MudLayout>
+
+@code {
+    private string UserName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+        }
+    }
+
+    bool open = false;
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+}

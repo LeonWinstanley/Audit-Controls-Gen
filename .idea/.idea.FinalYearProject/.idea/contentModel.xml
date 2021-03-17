@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\leonw\AppData\Local\JetBrains\Rider2020.3\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\leonw\AppData\Local\JetBrains\Rider2020.3\resharper-host\Local\Transient\Rider\v203\SolutionCaches\_FinalYearProject.214514678.00" t="ExcludeRecursive" />
+    <e p="C:\Users\leonw\AppData\Roaming\JetBrains\Rider2020.3\consoles\db" t="IncludeRecursive" />
+    <e p="C:\Users\leonw\AppData\Roaming\JetBrains\Rider2020.3\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\leonw\Desktop\Uni\Final-Year-Project\FinalYearProject" t="IncludeFlat">
+      <e p="FinalYearProject" t="IncludeRecursive">
+        <e p="_Imports.razor" t="Include" />
+        <e p="App.razor" t="Include" />
+        <e p="appsettings.Development.json" t="Include" />
+        <e p="appsettings.json" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="DatabaseContext.cs" t="Include" />
+        <e p="FinalYearProject.csproj" t="IncludeRecursive" />
+        <e p="Migrations" t="Include">
+          <e p="20210316133600_InitalCreate.cs" t="Include" />
+          <e p="20210316133600_InitalCreate.Designer.cs" t="Include" />
+          <e p="DatabaseContextModelSnapshot.cs" t="Include" />
+        </e>
+        <e p="Models" t="Include">
+          <e p="ControlEvaluations.cs" t="Include" />
+          <e p="Controls.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="net5.0" t="Include">
+              <e p="FinalYearProject.AssemblyInfo.cs" t="Include" />
+              <e p="FinalYearProject.RazorAssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Pages" t="Include">
+          <e p="_Host.cshtml" t="Include" />
+          <e p="ControlEvaluationBuilder.cshtml" t="Include" />
+          <e p="ControlEvaluationBuilder.cshtml.cs" t="Include" />
+          <e p="Index.razor" t="Include" />
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="launchSettings.json" t="Include" />
+        </e>
+        <e p="Shared" t="Include">
+          <e p="LoginDisplay.razor" t="Include" />
+          <e p="MainLayout.razor" t="Include" />
+          <e p="MainLayout.razor.css" t="Include" />
+          <e p="SideBarNav.razor" t="Include" />
+        </e>
+        <e p="Startup.cs" t="Include" />
+        <e p="wwwroot" t="Include">
+          <e p="favicon.ico" t="Include" />
+        </e>
+      </e>
+      <e p="FinalYearProject.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
