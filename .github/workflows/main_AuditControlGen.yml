@@ -32,5 +32,5 @@ jobs:
       with:
         app-name: 'AuditControlGen'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b6cbbb61a07142d0aedd51996c9de75c }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_d9c95e2a108e43dda9af29416484a73d }}
         package: ${{env.DOTNET_ROOT}}/myapp 
