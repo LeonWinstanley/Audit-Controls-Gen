@@ -4,14 +4,16 @@ using FinalYearProject;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FinalYearProject.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210317151343_AddedUserTable")]
+    partial class AddedUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,7 +39,7 @@ namespace FinalYearProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Controls");
+                    b.ToTable("Control");
                 });
 
             modelBuilder.Entity("FinalYearProject.Models.ControlEvaluationControls", b =>
@@ -59,7 +61,7 @@ namespace FinalYearProject.Migrations
 
                     b.HasIndex("ControlId");
 
-                    b.ToTable("ControlEvaluationControls");
+                    b.ToTable("ControlEvaluationControl");
                 });
 
             modelBuilder.Entity("FinalYearProject.Models.ControlEvaluations", b =>
@@ -69,32 +71,9 @@ namespace FinalYearProject.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ControlEvaluations");
-                });
-
-            modelBuilder.Entity("FinalYearProject.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserRole")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
+                    b.ToTable("ControlEvaluation");
                 });
 
             modelBuilder.Entity("FinalYearProject.Models.ControlEvaluationControls", b =>
@@ -112,19 +91,7 @@ namespace FinalYearProject.Migrations
 
             modelBuilder.Entity("FinalYearProject.Models.ControlEvaluations", b =>
                 {
-                    b.HasOne("FinalYearProject.Models.User", null)
-                        .WithMany("ControlEvaluations")
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("FinalYearProject.Models.ControlEvaluations", b =>
-                {
                     b.Navigation("ControlsList");
-                });
-
-            modelBuilder.Entity("FinalYearProject.Models.User", b =>
-                {
-                    b.Navigation("ControlEvaluations");
                 });
 #pragma warning restore 612, 618
         }

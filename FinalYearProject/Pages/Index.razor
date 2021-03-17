@@ -1,2 +1,25 @@
 ﻿@page "/index"
+@page "/"
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
+<MudContainer Class="mt-16">
+    
+    <MudText Align="Align.Center" Typo="Typo.h4">@UserName's Dashboard</MudText>
+    
+    
+</MudContainer>
+
+@code{
+    private string UserName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+        }
+    }
+}
