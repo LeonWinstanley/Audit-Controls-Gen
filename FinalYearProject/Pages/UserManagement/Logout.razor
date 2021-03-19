@@ -1,0 +1,27 @@
+@page "/Logout"
+@using FinalYearProject.Services
+@layout EmptyLayout
+
+@inject NavigationManager NavigationManager
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<LoadingScreen/>
+
+@code {
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            await UserService.Logout();
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/Login", true);
+        }
+    }
+}

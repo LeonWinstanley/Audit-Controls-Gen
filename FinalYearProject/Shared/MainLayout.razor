@@ -1,7 +1,7 @@
 ﻿@using FinalYearProject.Services
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject UserService UserService
+@inject NavigationManager NavigationManager
 <MudThemeProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
@@ -54,15 +54,10 @@
         if (user.Identity.IsAuthenticated)
         {
             UserName = user.Identity.Name;
-            
-            // check if user is in db. If user does not exist create new entry
-
-            var dbUser = await UserService.FetchUserFromDb(UserName);
-            if (string.IsNullOrEmpty(dbUser.UserName))
-            {
-                
-            }
-
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/Login", true);
         }
     }
 

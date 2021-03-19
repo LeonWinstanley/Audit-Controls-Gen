@@ -1,7 +1,10 @@
 ﻿@inherits LayoutComponentBase
 
-<MudNavMenu>
-    
-    <MudNavLink Href="/index" Icon="@Icons.Material.Filled.Home">Home Page</MudNavLink>
-    
+<MudNavMenu Class="pt-1">
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/index" Icon="@Icons.Material.Filled.Home">Home Page</MudNavLink>
+            <MudNavLink Href="/Logout" Icon="@Icons.Material.Filled.Logout">Log Out</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
 </MudNavMenu>

@@ -1,0 +1,72 @@
+@page "/Register"
+@layout EmptyLayout
+@using FinalYearProject.Models.Payloads
+@using FinalYearProject.Services
+@using InputType = MudBlazor.InputType
+@inject UserService UserService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+@if (!isLoading)
+{
+    <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+        <EditForm Model="@registerPayload" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator/>
+            <MudCard Elevation="5">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Align="Align.Center" Typo="Typo.h3">Registeration</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudDivider/>
+                <MudCardContent>
+                    <MudGrid Spacing="1">
+                        <MudItem xs="6">
+                            <MudTextField Label="First Name" @bind-value="registerPayload.FirstName" For="() => registerPayload.FirstName" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Label="First Name" @bind-value="registerPayload.LastName" For="() => registerPayload.LastName"/>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField Label="Email Address" @bind-value="registerPayload.EmailAddress" For="() => registerPayload.EmailAddress"/>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Label="Password" @bind-value="registerPayload.Password" For="() => registerPayload.Password" InputType="InputType.Password"/>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Label="Confirm Password" @bind-value="registerPayload.ConfirmPassword" For="() => registerPayload.ConfirmPassword" InputType="InputType.Password"/>
+                        </MudItem>
+                        
+                    </MudGrid>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Style="min-width: 100%" Color="Color.Primary" >Register</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </MudContainer>
+}
+else
+{
+    <LoadingScreen/>
+}
+@code {
+    bool isLoading;
+    RegisterPayload registerPayload = new();
+
+    private async void OnValidSubmit(EditContext Context)
+    {
+        isLoading = true;
+        try
+        {
+            await UserService.RegisterUser(registerPayload);
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            isLoading = false;
+            Snackbar.Add("An error has happened. Please check that the email is not already registered.");
+            StateHasChanged();
+        }
+    }
+}

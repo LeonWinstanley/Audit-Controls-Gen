@@ -1,0 +1,71 @@
+@page "/Login"
+@layout EmptyLayout
+
+@using FinalYearProject.Models.Payloads
+@using FinalYearProject.Services
+@using InputType = MudBlazor.InputType
+@inject UserService UserService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+@if (!isLoading)
+{
+    <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+        <EditForm Model="@signInPayload" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator/>
+            <MudCard Elevation="5">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Align="Align.Center" Typo="Typo.h3">Sign In</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudDivider/>
+                <MudCardContent>
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12">
+                            <MudTextField Label="Email Address" @bind-value="signInPayload.EmailAddress" For="() => signInPayload.EmailAddress" InputType="InputType.Email" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField Label="Password" @bind-value="signInPayload.Password" For="() => signInPayload.Password" InputType="InputType.Password"/>
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudGrid Justify="Justify.Center" Style="flex-direction: column">
+                        <MudItem xs="12">
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Style="min-width: 100%" Color="Color.Primary">Sign In</MudButton>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudLink Href="/Register" Typo="Typo.body2">Dont have an account? Register Here</MudLink> @*Link to register page*@
+                        </MudItem>
+                    </MudGrid>
+                    </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </MudContainer>
+}
+else
+{
+    <LoadingScreen/>
+}
+@code {
+    bool isLoading;
+    SignInPayload signInPayload = new();
+
+    private async void OnValidSubmit(EditContext Context)
+    {
+        isLoading = true;
+        try
+        {
+            await UserService.Login(signInPayload);
+            isLoading = false;
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            isLoading = false;
+            Snackbar.Add(e.Message);
+            StateHasChanged();
+        }
+    }
+}
