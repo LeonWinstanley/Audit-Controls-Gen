@@ -1,0 +1,48 @@
+@page "/ManagementDashboard"
+@using FinalYearProject.Services
+@using FinalYearProject.Models
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@if (_isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    <MudContainer>
+        <MudCard>
+            <MudCardContent>
+                <MudTabs Color="Color.Primary" Rounded="true" Centered="true">
+                    <MudTabPanel Text="Registered Users">
+                        <RegisteredUsers AllUsers="@_allUsers"/>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Register User">
+                        <RegisterUser/>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudCardContent>
+        </MudCard>
+    </MudContainer>
+}
+
+@code{
+
+    private User _user = new();
+    private bool _isLoading;
+    private List<User> _allUsers = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _allUsers = await UserService.FetchAllUserProfiles();
+            _user = await UserService.FetchUserWithControlEval(user.Identity.Name);
+        }
+        _isLoading = false;
+    }
+
+}

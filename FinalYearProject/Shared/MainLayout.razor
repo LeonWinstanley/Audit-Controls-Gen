@@ -1,7 +1,9 @@
 ﻿@using FinalYearProject.Services
+@using FinalYearProject.Models
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject UserService UserService
 <MudThemeProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
@@ -15,7 +17,7 @@
         <MudAppBarSpacer/>
         <AuthorizeView>
             <Authorized>
-                <MudText Class="pr-4" Typo="Typo.body1"> Username: @UserName</MudText>
+                <MudText Class="pr-4" Typo="Typo.body1"> User: @UserName</MudText>
             </Authorized>
         </AuthorizeView>
     </MudAppBar>

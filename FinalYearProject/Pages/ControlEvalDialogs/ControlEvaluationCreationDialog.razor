@@ -1,0 +1,59 @@
+@using FinalYearProject.Models.Payloads
+@using FinalYearProject.Services
+@using InputType = MudBlazor.InputType
+@using FinalYearProject.Models
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject UserService UserService
+<EditForm Model="ControlEvaluationPayload" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <MudDialog>
+        <DialogContent>
+            <MudTextField Label="Audit Title" @bind-value="ControlEvaluationPayload.AuditTitle" For="() => ControlEvaluationPayload.AuditTitle" InputType="InputType.Text"/>
+            <MudTextField Label="Lead Auditor" @bind-value="ControlEvaluationPayload.LeadAuditor" For="() => ControlEvaluationPayload.LeadAuditor" Class="pb-3"/>
+        </DialogContent>
+        
+        <DialogActions>
+            <MudButton OnClick="Cancel" Color="Color.Dark" Variant="Variant.Filled">Cancel</MudButton>
+            <MudButton Color="Color.Primary" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Class="mr-3">Create</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; }
+
+    User _user = new();
+    ControlEvaluationPayload ControlEvaluationPayload = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _user = await UserService.FetchUserProfile(user.Identity.Name);
+        }
+    }
+
+    private async void OnValidSubmit(EditContext Context)
+    {
+        try
+        {
+            await UserService.CreateUserControlEvaluation(_user.Email, ControlEvaluationPayload);
+            MudDialog.Close(DialogResult.Ok(""));
+        }
+        catch (Exception e)
+        {
+            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+        
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close(DialogResult.Cancel());
+    }
+}

@@ -35,9 +35,11 @@
                         <MudItem xs="12">
                             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Style="min-width: 100%" Color="Color.Primary">Sign In</MudButton>
                         </MudItem>
-                        <MudItem xs="12">
-                            <MudLink Href="/Register" Typo="Typo.body2">Dont have an account? Register Here</MudLink> @*Link to register page*@
-                        </MudItem>
+                        <MudGrid Justify="Justify.Center" Style="flex-direction: column; align-content: center" Class="pb-3">
+                            <MudItem xs="12">
+                                <MudLink Href="/Register" Typo="Typo.body2">Dont have an account? Register Here</MudLink> @*Link to register page*@
+                                </MudItem>
+                        </MudGrid>
                     </MudGrid>
                     </MudCardActions>
             </MudCard>

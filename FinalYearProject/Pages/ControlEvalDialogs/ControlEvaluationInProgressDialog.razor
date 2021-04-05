@@ -1,0 +1,172 @@
+@using FinalYearProject.Models
+@using FinalYearProject.Enums
+@using FinalYearProject.Services
+@inject DatabaseContext DatabaseContext
+@inject ControlsService ControlsService
+@inject ISnackbar SnackBar
+
+
+@if (isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.h4">Control Evaluation Builder - @dialogTitle</MudText>
+            <MudDivider Class="my-3"/>
+            <ControlsTable allControls="@allControls" />
+            <MudDivider Class="my-3"/>
+            <MudCard Elevation="3" Class="mb-3">
+                <MudGrid Justify="Justify.Center" Style="height: 300px">
+                    <MudItem xs="4">
+                        <MudGrid Justify="Justify.Center" Style="Height:100%; flex-direction: column; align-items: center" Class="mb-5">
+                            <MudItem>
+                                <MudTextField For="() => controlIDAdd" @bind-value="@controlIDAdd" Variant="Variant.Outlined" Label="Control ID" Placeholder="Enter Control ID"></MudTextField>
+                            </MudItem>
+                            <MudItem>
+                                <MudButton OnClick="AddControlID" Variant="Variant.Filled" Color="Color.Primary">Add Control</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudGrid Justify="Justify.Center" Style="Height:100%; flex-direction: column; align-items: center" Class="mb-5">
+                            <MudItem>
+                                <MudTextField For="() => controlIDRemove" @bind-value="@controlIDRemove" Variant="Variant.Outlined" Label="Control ID" Placeholder="Enter Control ID"></MudTextField>
+                            </MudItem>
+                            <MudItem>
+                                <MudButton OnClick="RemoveControlID" Variant="Variant.Filled" Color="Color.Primary">Remove Control</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudTable Items="ControlEval.ControlsList" Dense="true" FixedHeader="true" Height="215px" Elevation="1">
+                            <ToolBarContent>
+                                <MudText Typo="Typo.h5" Style="font-weight: bold">Selected Controls</MudText>
+                            </ToolBarContent>
+                            <HeaderContent>
+                                <MudTh>Control ID</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>@context.Control.Id</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudItem>
+                </MudGrid>
+            </MudCard>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Size="Size.Large" OnClick="Exit" Color="Color.Dark" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Cancel</MudButton>
+            @if (ControlEval.ControlStage == ControlStage.InProgress)
+            {
+                <MudButton Size="Size.Large" OnClick="SendForReview" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Send For Review</MudButton>
+            }
+            @if (ControlEval.ControlStage == ControlStage.InReview)
+            {
+                <AuthorizeView Roles=@Role.Reviewer.ToString()>
+                    <Authorized>
+                        <MudButton Size="Size.Large" OnClick="CompleteReview" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Send For Review</MudButton>
+                    </Authorized>
+                </AuthorizeView>
+            }
+        </DialogActions>
+    </MudDialog>
+}
+
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public ControlEvaluations ControlEval { get; set; } = new ControlEvaluations();
+
+    [Parameter]
+    public User user { get; set; } = new User();
+    
+    [Parameter]
+    public string dialogTitle { get; set; }
+
+    public int? controlIDAdd { get; set; }
+    public int? controlIDRemove { get; set; }
+    public List<Control> allControls = new List<Control>();
+
+    bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        allControls = await ControlsService.FetchAllControls();
+        isLoading = false;
+    }
+
+    async Task Exit()
+    {
+        await DatabaseContext.SaveChangesAsync();
+        MudDialog.Close(DialogResult.Cancel());
+    }
+
+    async Task SendForReview()
+    {
+        ControlEval.ControlStage = ControlStage.InReview;
+        await DatabaseContext.SaveChangesAsync();
+        SnackBar.Add("Your control evaluation has been sent for review.", Severity.Success);
+        MudDialog.Close(DialogResult.Ok("reload"));
+    }
+
+    async Task CompleteReview()
+    {
+        ControlEval.ControlStage = ControlStage.Completed;
+        await DatabaseContext.SaveChangesAsync();
+        SnackBar.Add("The control evaluation has been set as 'completed'.", Severity.Success);
+        MudDialog.Close(DialogResult.Ok("reload"));
+    }
+
+    void AddControlID()
+    {
+        try
+        {
+            var currentControl = allControls.SingleOrDefault(x => x.Id == controlIDAdd);
+            if (currentControl != null)
+            {
+                if (!ControlEval.ControlsList.Any(x => x.Control.Id == controlIDAdd))
+                {
+                    ControlEval.ControlsList.Add(new ControlEvaluationControls(){Control = currentControl});
+                }
+                else
+                {
+                    SnackBar.Add("That control ID is already in use.", Severity.Warning);
+                }
+            }
+            else
+            {
+                SnackBar.Add("Please enter a valid control ID", Severity.Warning);
+            }
+        }
+        catch (Exception e)
+        {
+            SnackBar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+
+    }
+
+    void RemoveControlID()
+    {
+        try
+        {
+            var currentControl = ControlEval.ControlsList.SingleOrDefault(x => x.Control.Id == controlIDRemove);
+            if (currentControl != null)
+            {
+                ControlEval.ControlsList.Remove(currentControl);
+            }
+            else
+            {
+                SnackBar.Add("We could not find that control ID in your selected controls.", Severity.Warning);
+            }
+        }
+        catch (Exception e)
+        {
+            SnackBar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+    }
+}

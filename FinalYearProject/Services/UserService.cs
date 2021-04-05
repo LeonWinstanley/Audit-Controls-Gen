@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FinalYearProject.Enums;
 using FinalYearProject.Models;
@@ -36,6 +38,8 @@ namespace FinalYearProject.Services
             {
                 UserName = RegisterPayload.EmailAddress,
                 Email = RegisterPayload.EmailAddress,
+                FirstName = RegisterPayload.FirstName,
+                LastName = RegisterPayload.LastName,
                 EmailConfirmed = true
             };
 
@@ -85,6 +89,47 @@ namespace FinalYearProject.Services
             await _signInOutService.SignOutAsync();
             _snackbar.Add("Logout successful!", Severity.Success, config => { config.ShowCloseIcon = false; });
             _navigationManager.NavigateTo("/", true);
+        }
+
+        public async Task<User> FetchUserProfile(string Email)
+        {
+            return await _context.Users.SingleOrDefaultAsync(x => x.NormalizedEmail == Email.ToUpper());
+        }
+
+        public async Task<User> FetchUserWithControlEval(string Email)
+        {
+            return await _context.Users.Include(x => x.ControlEvaluations).ThenInclude(x => x.ControlsList).SingleOrDefaultAsync(x => x.NormalizedEmail == Email.ToUpper());
+        }
+
+        public async Task<List<ControlEvaluations>> FetchUserControlEvaluations(string Email)
+        {
+            return await _context.Users.Where(x => x.NormalizedEmail == Email.ToUpper())
+                .SelectMany(x => x.ControlEvaluations).Include(x => x.ControlsList).ToListAsync();
+        }
+
+        public async Task CreateUserControlEvaluation(string Email, ControlEvaluationPayload ControlEvaluationPayload)
+        {
+            var user = await FetchUserWithControlEval(Email);
+            
+            ControlEvaluations controlEvaluation = new()
+            {
+                AuditName = ControlEvaluationPayload.AuditTitle,
+                DateCreated = DateTimeOffset.Now,
+                LeadAuditor = ControlEvaluationPayload.LeadAuditor,
+                ControlStage = ControlStage.InProgress
+            };
+            user.ControlEvaluations.Add(controlEvaluation);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<User>> FetchAllUserProfiles()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        public async Task ChangeUserRole(User User, Role Role)
+        {
+            await _userManager.AddToRoleAsync(User, Role.ToString());
         }
     }
 }

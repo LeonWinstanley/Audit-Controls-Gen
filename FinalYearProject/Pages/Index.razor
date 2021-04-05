@@ -1,25 +1,210 @@
 ﻿@page "/index"
 @page "/"
+@using FinalYearProject.Models
+@using FinalYearProject.Services
+@using FinalYearProject.Enums
+@using FinalYearProject.Pages.ControlEvalDialogs
+@using System.Runtime.CompilerServices
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserService UserService
+@inject ControlsService ControlsService
+@inject IDialogService DialogService
 
-<MudContainer Class="mt-16">
-    
-    <MudText Align="Align.Center" Typo="Typo.h4">@UserName's Dashboard</MudText>
-    
-    
-</MudContainer>
+@if (_isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    <MudContainer Class="mt-16">
+        <MudGrid Justify="Justify.Center">
+            <MudItem Class="pb-10">
+                <MudButton Size="Size.Large" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Button" OnClick="() => CreateNewControlEvaluation()"> Create a new Control Evaluation! </MudButton>
+            </MudItem>
+            <MudItem xs="12" Class="pb-10">
+                <MudDivider/>
+            </MudItem>
+            <MudItem xs="12" Class="pb-10">
+                <MudText Align="Align.Center" Typo="Typo.h4">In Progress</MudText>
+            </MudItem>
+            <MudItem xs="12">
+            
+                @if (_user != null)
+                {
+                    @foreach (var ControlEval in _user.ControlEvaluations.Where(x => x.ControlStage == ControlStage.InProgress))
+                    {
+                        <MudCard Elevation="3" Class="mb-5">
+                                <MudCardContent>
+                                    <MudGrid Style="flex-direction: row; align-items: center; height: 100px" Justify="Justify.SpaceBetween">
+                                        <MudItem xs="3">
+                                            <MudText>Audit Title: @ControlEval.AuditName </MudText>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText>Lead Auditor: @ControlEval.LeadAuditor </MudText>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText>Status: In Progress</MudText>
+                                        </MudItem>
+                                        <MudItem xs="2" Style="height: 80%">
+                                            <MudButton FullWidth="true" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OpenControlEvaluation(ControlEval)" Style="height: 100%">Open</MudButton>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudCardContent>
+                            </MudCard>
+                    }
+                    @if (!_user.ControlEvaluations.Any(x => x.ControlStage == ControlStage.InProgress))
+                    {
+                        <MudAlert Severity="Severity.Info">You currently have no in progress control evaluations.</MudAlert>
+                    }
+                }
+        
+            </MudItem>
+            <MudItem xs="12" Class="pb-10">
+                <MudText Align="Align.Center" Typo="Typo.h4">In Review</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                @if (_user != null)
+                {
+                    @foreach (var ControlEval in _user.ControlEvaluations.Where(x => x.ControlStage == ControlStage.InReview))
+                    {
+                        <MudCard Elevation="3" Class="mb-5">
+                            <MudCardContent>
+                                <MudGrid Style="flex-direction: row; align-items: center; height: 100px" Justify="Justify.SpaceBetween">
+                                    <MudItem xs="3">
+                                        <MudText>Audit Title: @ControlEval.AuditName </MudText>
+                                    </MudItem>
+                                    <MudItem xs="3">
+                                        <MudText>Lead Auditor: @ControlEval.LeadAuditor </MudText>
+                                    </MudItem>
+                                    <MudItem xs="3">
+                                        <MudText>Status: In Review</MudText>
+                                    </MudItem>
+                                    <MudItem xs="2" Style="height: 80%">
+                                        <MudButton FullWidth="true" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OpenControlEvaluation(ControlEval)" Style="height: 100%">Open</MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                    @if (!_user.ControlEvaluations.Any(x => x.ControlStage == ControlStage.InReview))
+                    {
+                        <MudAlert Severity="Severity.Info">You currently have no control evaluations in review.</MudAlert>
+                    }
+                }
+            </MudItem>
+            <MudItem xs="12" Class="pb-10">
+                <MudText Align="Align.Center" Typo="Typo.h4">Completed</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                @if (_user != null)
+                    {
+                        @foreach (var ControlEval in _user.ControlEvaluations.Where(x => x.ControlStage == ControlStage.Completed))
+                        {
+                            <MudCard Elevation="3" Class="mb-5">
+                                <MudCardContent>
+                                    <MudGrid Style="flex-direction: row; align-items: center; height: 100px" Justify="Justify.SpaceBetween">
+                                        <MudItem xs="3">
+                                            <MudText>Audit Title: @ControlEval.AuditName </MudText>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText>Lead Auditor: @ControlEval.LeadAuditor </MudText>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText>Status: Completed</MudText>
+                                        </MudItem>
+                                        <MudItem Style="height: 80%">
+                                            <MudButton FullWidth="true" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OpenControlEvaluation(ControlEval)" Style="height: 100%">Open</MudButton>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudCardContent>
+                            </MudCard>
+                        }
+                        @if (!_user.ControlEvaluations.Any(x => x.ControlStage == ControlStage.Completed))
+                        {
+                            <MudAlert Severity="Severity.Info">You currently have no completed control evaluations.</MudAlert>
+                        }
+                    }
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+}
 
 @code{
-    private string UserName { get; set; }
+    private User _user = new();
 
+    private bool _isLoading;
+    
     protected override async Task OnInitializedAsync()
     {
+        _isLoading = true;
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
         if (user.Identity.IsAuthenticated)
         {
-            UserName = user.Identity.Name;
+            
+            _user = await UserService.FetchUserWithControlEval(user.Identity.Name);
         }
+        _isLoading = false;
+    }
+    
+    async Task CreateNewControlEvaluation()
+    {
+        var dialog = DialogService.Show<ControlEvaluationCreationDialog>("Control Evaluation Creation Screen");
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            Console.WriteLine("CreateNew");
+            await base.OnInitializedAsync();
+            StateHasChanged();
+        }
+    }
+
+    async Task OpenControlEvaluation(ControlEvaluations ControlEval)
+    {
+        DialogParameters parameters = new() {["ControlEval"] = ControlEval, ["user"] = _user};
+        DialogOptions options = new() {FullWidth = true, MaxWidth = MaxWidth.Large};
+        IDialogReference dialog = new DialogReference(new Guid(),new DialogService());
+        
+        if (ControlEval.ControlStage == ControlStage.InProgress)
+        {
+            parameters.Add("dialogTitle", "In Progress");
+            dialog = DialogService.Show<ControlEvaluationInProgressDialog>("",parameters,options);
+        }
+        else if (ControlEval.ControlStage == ControlStage.InReview)
+        {
+            parameters.Add("dialogTitle", "In Review");
+            dialog = DialogService.Show<ControlEvaluationInProgressDialog>("",parameters,options);
+        }
+        else if (ControlEval.ControlStage == ControlStage.Completed)
+        {
+            dialog = DialogService.Show<ControlEvaluationCompletedDialog>("",parameters,options);
+        }
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await base.OnInitializedAsync();
+            StateHasChanged();
+        }
+    }
+
+    async Task ImportControlsFunc()
+    {
+        List<Control> controls = new List<Control>();
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary1", ControlExpected = "ExampleControlExpected1" , ControlTest = "ExampleControlTest1"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary2", ControlExpected = "ExampleControlExpected2" , ControlTest = "ExampleControlTest2"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary3", ControlExpected = "ExampleControlExpected3" , ControlTest = "ExampleControlTest3"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary4", ControlExpected = "ExampleControlExpected4" , ControlTest = "ExampleControlTest4"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary5", ControlExpected = "ExampleControlExpected5" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary6", ControlExpected = "ExampleControlExpected6" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary7", ControlExpected = "ExampleControlExpected7" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary8", ControlExpected = "ExampleControlExpected8" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary9", ControlExpected = "ExampleControlExpected9" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary10", ControlExpected = "ExampleControlExpected10" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary11", ControlExpected = "ExampleControlExpected11" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary12", ControlExpected = "ExampleControlExpected12" , ControlTest = "ExampleControlTest5"});
+        controls.Add(new Control(){ControlSummary = "ExampleControlSummary13", ControlExpected = "ExampleControlExpected13" , ControlTest = "ExampleControlTest5"});
+        
+        await ControlsService.ImportControls(controls);
     }
 }

@@ -1,0 +1,60 @@
+@using FinalYearProject.Models
+@using FinalYearProject.Services
+@inject UserService UserService
+@inject DialogService DialogService
+
+
+@if (_isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    <MudText Class="mt-5 mb-5" Style="font-weight: bold" Align="Align.Center" Typo="Typo.h5" Color="Color.Primary">Registered Users - Click a user to edit</MudText>
+    <MudDivider Class="mb-5"/>
+    <MudTable Items="@AllUsers" Height="600px" SelectedItemChanged="() => onRowClick()" SelectedItem="selectedItem">
+        <HeaderContent>
+            <MudTh>First Name</MudTh>
+            <MudTh>Last Name</MudTh>
+            <MudTh>Email Address</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTh>@context.FirstName</MudTh>
+            <MudTh>@context.LastName</MudTh>
+            <MudTh>@context.Email</MudTh>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+
+    [Parameter]
+    public List<User> AllUsers { get; set; }
+
+    bool _isLoading;
+    public User selectedItem { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        _isLoading = false;
+    }
+
+    async Task onRowClick()
+    {
+        _isLoading = true;
+        
+        DialogParameters parameters = new() {["User"] = selectedItem};
+        DialogOptions options = new() {FullWidth = true, MaxWidth = MaxWidth.Large};
+        
+        var dialog = DialogService.Show<ManagementEditProfileDialog>("", parameters, options);
+        var result = await dialog.Result;
+        
+        if (!result.Cancelled)
+        {
+            await base.OnInitializedAsync();
+            StateHasChanged();
+        }
+        _isLoading = false;
+    }
+    
+}

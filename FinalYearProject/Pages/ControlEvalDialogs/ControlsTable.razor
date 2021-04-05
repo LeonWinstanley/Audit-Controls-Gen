@@ -1,0 +1,46 @@
+@using FinalYearProject.Services
+@using FinalYearProject.Models
+@inject ControlsService ControlsService
+
+    <MudTable Items="@allControls" Filter="new Func<Control, bool>(FilterFunc)" Striped="true" Bordered="true" Height="400px" FixedHeader="true" Elevation="3">
+        <ToolBarContent>
+            <MudText Typo="Typo.h5" Style="font-weight: bold">Select Controls</MudText>
+            <MudToolBarSpacer/>
+            <MudTextField For="() => tableSearchString" @bind-value="tableSearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Control, object>(x => x.Id)">Control ID</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Control,object>(x => x.ControlSummary)">Control Summary</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Control,object>(x => x.ControlExpected)">Control Expectation</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Control,object>(x => x.ControlTest)">Control Test</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Id</MudTd>
+            <MudTd>@context.ControlSummary</MudTd>
+            <MudTd>@context.ControlExpected</MudTd>
+            <MudTd>@context.ControlTest</MudTd>
+        </RowTemplate>
+    </MudTable>
+
+
+@code {
+    [Parameter] public List<Control> allControls { get; set; }
+    private string tableSearchString { get; set; }
+
+    private bool FilterFunc(Control control)
+    {
+        if (string.IsNullOrWhiteSpace(tableSearchString))
+            return true;
+        if (control.Id.ToString().Contains(tableSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (control.ControlExpected.Contains(tableSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (control.ControlSummary.Contains(tableSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (control.ControlTest.Contains(tableSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{control.Id} {control.ControlExpected} {control.ControlSummary} {control.ControlTest}".Contains(tableSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+}

@@ -4,14 +4,16 @@ using FinalYearProject;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FinalYearProject.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210320134149_AddedControlEvaluationDetails")]
+    partial class AddedControlEvaluationDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,9 +73,6 @@ namespace FinalYearProject.Migrations
 
                     b.Property<string>("AuditName")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ControlStage")
-                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");

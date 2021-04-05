@@ -45,6 +45,7 @@ namespace FinalYearProject
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(builder.ConnectionString));
             services.AddScoped<UserService>();
             services.AddScoped<SignInOutService>();
+            services.AddScoped<ControlsService>();
             services.AddIdentityCore<User>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DatabaseContext>()
                 .AddSignInManager()
