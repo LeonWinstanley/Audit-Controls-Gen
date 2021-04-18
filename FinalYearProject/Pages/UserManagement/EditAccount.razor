@@ -1,0 +1,97 @@
+@page "/EditAccount"
+@using FinalYearProject.Models
+@using FinalYearProject.Models.Payloads
+@using FinalYearProject.Services
+@using InputType = MudBlazor.InputType
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@if (isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    
+    <MudContainer MaxWidth="MaxWidth.Large">
+    
+        <MudGrid Spacing="1">
+            <MudItem xs="12">
+                <MudPaper>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Align="Align.Center" Typo="Typo.h4" Color="Color.Primary">Edit Account</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudExpansionPanels MultiExpansion="true">
+                            <MudExpansionPanel Text="Password Reset">
+                                <EditForm Model="ResetPayload" OnValidSubmit="UpdatePassword" Context="anotherName">
+                                    <DataAnnotationsValidator/>
+                                    <MudGrid Spacing="1">
+                                        <MudItem xs="12">
+                                            <MudTextField InputType="InputType.Password" Label="Current Password" @bind-Value="ResetPayload.CurrentPassword" For="() => ResetPayload.CurrentPassword"/>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudTextField InputType="InputType.Password" Label="New Password" @bind-Value="ResetPayload.NewPassword" For="() => ResetPayload.CurrentPassword"/>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudTextField InputType="InputType.Password" Label="Confirm New Password" @bind-Value="ResetPayload.NewPasswordConfirm" For="() => ResetPayload.CurrentPassword"/>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Update Password</MudButton> 
+                                        </MudItem>
+                                    </MudGrid>
+                                </EditForm>
+                            </MudExpansionPanel>
+                            <MudExpansionPanel Text="Email Address">
+                                <MudGrid Spacing="1">
+                                    <MudItem xs="12">
+                                        <MudTextField ReadOnly="true" Label="Email Address" @bind-Value="_user.Email"/>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField Label="New Email Address" @bind-Value="UpdatedEmailAddress"/>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateEmailAddress">Update Email Address</MudButton> 
+                                        </MudItem>
+                                </MudGrid>
+                            </MudExpansionPanel>
+                        </MudExpansionPanels>
+                    </MudCardContent>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+}
+
+
+@code {
+    bool isLoading;
+    User _user = new();
+    PasswordResetPayload ResetPayload = new();
+    string UpdatedEmailAddress;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _user = await UserService.FetchUserProfile(user.Identity.Name);
+        }
+        isLoading = false;
+    }
+
+    void UpdatePassword()
+    {
+        
+    }
+
+    void UpdateEmailAddress()
+    {
+        
+    }
+}

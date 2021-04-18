@@ -46,6 +46,7 @@ namespace FinalYearProject
             services.AddScoped<UserService>();
             services.AddScoped<SignInOutService>();
             services.AddScoped<ControlsService>();
+            services.AddScoped<EmailService>();
             services.AddIdentityCore<User>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DatabaseContext>()
                 .AddSignInManager()
@@ -101,6 +102,7 @@ namespace FinalYearProject
         {
             //initializing custom roles 
             var roleManager = ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var UserManager = ServiceProvider.GetRequiredService<UserManager<User>>();
 
             foreach (Role roleName in Enum.GetValues(typeof(Role)))
             {
@@ -110,6 +112,56 @@ namespace FinalYearProject
                     //create the roles and seed them to the database.
                     await roleManager.CreateAsync(new IdentityRole(roleName.ToString()));
                 }
+            }
+            
+            // Create superUser. Password will be changed on setup
+            var poweruser = new User
+            {
+                UserName = "admin",
+                Email = "admin@admin",
+                EmailConfirmed = true,
+            };
+
+            var tempUser = new User
+            {
+                FirstName = "temp",
+                LastName = "temp",
+                UserName = "temp",
+                Email = "temp@temp",
+                EmailConfirmed = true
+            };
+
+            string password = "!!P@assword123";
+            var user = await UserManager.FindByEmailAsync("admin");
+            var tUser = await UserManager.FindByEmailAsync("temp");
+            if (user == null)
+            {
+                Console.WriteLine("Creating Admin Account...");
+                var createPowerUser = await UserManager.CreateAsync(poweruser, password);
+                if (createPowerUser.Succeeded)
+                {
+                    await UserManager.AddToRoleAsync(poweruser, Role.Developer.ToString());
+                    Console.WriteLine("Admin Account Created...");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Admin Account Already Exists...");
+            }
+
+            if (tUser == null)
+            {
+                Console.WriteLine("Creating Temp User...");
+                var createTempUser = await UserManager.CreateAsync(tempUser, password);
+                if (createTempUser.Succeeded)
+                {
+                    await UserManager.AddToRoleAsync(tempUser, Role.Auditor.ToString());
+                    Console.WriteLine("Temp User Created...");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Temp User Already Exists...");
             }
         }
     }

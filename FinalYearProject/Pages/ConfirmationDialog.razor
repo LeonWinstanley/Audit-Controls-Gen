@@ -1,0 +1,28 @@
+@if (isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <MudText>
+                Are you sure that you want to @textString
+            </MudText>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Size="Size.Large" OnClick="@(() => MudDialog.Close(DialogResult.Cancel()))" Color="Color.Dark" ButtonType="ButtonType.Button" Variant="Variant.Filled">Exit</MudButton>
+            <MudButton Size="Size.Large" OnClick="@(() => MudDialog.Close(DialogResult.Ok("Confirm")))" Color="Color.Error" ButtonType="ButtonType.Button" Variant="Variant.Filled">Confirm</MudButton>
+        </DialogActions>
+    </MudDialog>
+}
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public string textString { get; set; }
+    
+    bool isLoading;
+
+}

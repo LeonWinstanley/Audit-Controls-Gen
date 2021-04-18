@@ -1,8 +1,13 @@
 @using FinalYearProject.Models
 @using FinalYearProject.Services
+@using System.Threading
+@using FinalYearProject.Enums
+@using FinalYearProject.Models.ViewModels
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @inject UserService UserService
-@inject DialogService DialogService
-
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 
 @if (_isLoading)
 {
@@ -12,17 +17,52 @@ else
 {
     <MudText Class="mt-5 mb-5" Style="font-weight: bold" Align="Align.Center" Typo="Typo.h5" Color="Color.Primary">Registered Users - Click a user to edit</MudText>
     <MudDivider Class="mb-5"/>
-    <MudTable Items="@AllUsers" Height="600px" SelectedItemChanged="() => onRowClick()" SelectedItem="selectedItem">
+    <MudTable Items="@RegisteredUsersViewModels" Height="600px" Hover="true" MultiSelection="false">
+        <ColGroup>
+            <col style="width:25%" />
+            <col style="width:25%" />
+            <col style="width:25%" />
+            <col style="width:25%" />
+        </ColGroup>
         <HeaderContent>
             <MudTh>First Name</MudTh>
             <MudTh>Last Name</MudTh>
             <MudTh>Email Address</MudTh>
+            <MudTh>User Role</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTh>@context.FirstName</MudTh>
-            <MudTh>@context.LastName</MudTh>
-            <MudTh>@context.Email</MudTh>
+            <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+            <MudTd DataLabel="LastName">@context.LastName</MudTd>
+            <MudTd DataLabel="Email">@context.EmailAddress</MudTd>
+            <MudTd DataLabel="Role">@context.Role</MudTd>
         </RowTemplate>
+        <RowEditingTemplate>
+            <MudTd DataLabel="FirstName">
+                <MudTextField T="string" @bind-Value="@context.FirstName" Required/>
+            </MudTd>
+            <MudTd DataLabel="LastName">
+                <MudTextField T="string" @bind-Value="@context.LastName" Required/>
+            </MudTd>
+            <MudTd DataLabel="Email">
+                <MudTextField T="string" @bind-Value="@context.EmailAddress" Required/>
+            </MudTd>
+            <MudTd DataLabel="Role">
+                <MudSelect T="string" OffsetY="true" Placeholder="@context.Role" @bind-Value="@context.Role">
+                    <MudSelectItem T="string" Value="Role.Auditor.ToString()">Auditor</MudSelectItem>
+                    <MudSelectItem T="string" Value="Role.Reviewer.ToString()">Reviewer</MudSelectItem>
+                    <MudSelectItem T="string" Value="Role.Developer.ToString()">Developer</MudSelectItem>
+                </MudSelect>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => saveUserDetails(@context))">Save Changes</MudButton>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => deleteUser(@context))">Delete User</MudButton>
+            </MudTd>
+        </RowEditingTemplate>
+        <PagerContent>
+            <MudTablePager/>
+        </PagerContent>
     </MudTable>
 }
 
@@ -31,30 +71,61 @@ else
     [Parameter]
     public List<User> AllUsers { get; set; }
 
+    public List<RegisteredUsersViewModel> RegisteredUsersViewModels = new();
     bool _isLoading;
-    public User selectedItem { get; set; }
+    
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
-        _isLoading = false;
-    }
-
-    async Task onRowClick()
-    {
-        _isLoading = true;
-        
-        DialogParameters parameters = new() {["User"] = selectedItem};
-        DialogOptions options = new() {FullWidth = true, MaxWidth = MaxWidth.Large};
-        
-        var dialog = DialogService.Show<ManagementEditProfileDialog>("", parameters, options);
-        var result = await dialog.Result;
-        
-        if (!result.Cancelled)
+        foreach (var user in AllUsers)
         {
-            await base.OnInitializedAsync();
-            StateHasChanged();
+            // check so that admin account cannot be edited.
+            if (user.Email != "admin@admin")
+            {
+                RegisteredUsersViewModels.Add(new()
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    EmailAddress = user.Email,
+                    Role = await UserService.ExtractUserRole(user)
+                });
+            }
         }
         _isLoading = false;
     }
-    
-}
+
+    async Task saveUserDetails(RegisteredUsersViewModel ViewModel)
+    {
+        var user = AllUsers.SingleOrDefault(x => x.Email == ViewModel.EmailAddress);
+        user.FirstName = ViewModel.FirstName;
+        user.LastName = ViewModel.LastName;
+        user.Email = ViewModel.EmailAddress;
+        await UserService.EditUserSaveChanges(user, ViewModel.Role);
+        Snackbar.Add("User details have been updated.", Severity.Success);
+    }
+
+    async Task deleteUser(RegisteredUsersViewModel ViewModel)
+    {
+        var user = AllUsers.SingleOrDefault(x => x.Email == ViewModel.EmailAddress);
+        var textString = $"remove the user: {user.FirstName} {user.LastName}. \n" +
+                         "This will remove any control evaluations still linked to this user.";
+        DialogParameters parameters = new() {["textString"] = textString};
+        var dialog = DialogService.Show<ConfirmationDialog>("User Deletion - Confirmation", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            try
+            {
+                await UserService.RemoveUser(user);
+                NavigationManager.NavigateTo(NavigationManager.Uri, true);
+            }
+            catch (Exception e)
+            {
+                Snackbar.Add(e.Message, Severity.Error);
+            }
+            
+        }
+        await base.OnInitializedAsync();
+    }
+}``

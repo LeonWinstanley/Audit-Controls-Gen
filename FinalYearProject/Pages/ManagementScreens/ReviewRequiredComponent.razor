@@ -1,5 +1,73 @@
-<h3>ReviewRequiredComponent</h3>
+@using FinalYearProject.Models
+@using FinalYearProject.Services
+@using FinalYearProject.Pages.ControlEvalDialogs
+@inject UserService UserService
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 
+@if (isLoading)
+{
+    <LoadingScreen/>
+}
+else
+{
+    <MudTable Items="@InReviewControlEvaluations" Height="600px">
+        <ColGroup>
+            <col style="width:25%" />
+            <col style="width:25%" />
+            <col style="width:25%" />
+            <col style="width:25%" />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Audit Name</MudTh>
+            <MudTh>Lead Auditor</MudTh>
+            <MudTh>Picked Up By</MudTh>
+            <MudTh> </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="AuditName">@context.AuditName</MudTd>
+            <MudTd DataLabel="LeadAuditor">@context.LeadAuditor</MudTd>
+            <MudTd DataLabel="PickedUpBy">
+                @if (string.IsNullOrEmpty(@context.ReviewerEmail))
+                {
+                    <MudText>Not picked up</MudText>
+                }
+                else
+                {
+                    <MudText>@context.ReviewerEmail</MudText>
+                }
+            </MudTd>
+            <MudTd>
+                <MudButton ButtonType="ButtonType.Button" OnClick="@(() => openControlEvaluation(context))" Variant="Variant.Outlined">Open Control Evaluation</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
 @code {
-    
+    [Parameter]
+    public List<ControlEvaluations> InReviewControlEvaluations { get; set; }
+
+
+    bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        isLoading = false;
+    }
+
+    async Task openControlEvaluation(ControlEvaluations controlEvaluations)
+    {
+        var user = await UserService.FetchUserFromControlEval(controlEvaluations);
+        DialogParameters parameters = new() {["ControlEval"] = controlEvaluations, ["user"] = user, ["dialogTitle"] = "In Progress", ["tableWidth"] = 4};
+        DialogOptions options = new() {FullWidth = true, MaxWidth = MaxWidth.Large};
+        var dialog = DialogService.Show<ControlEvaluationDialog>("",parameters,options);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        }
+    }
+
 }

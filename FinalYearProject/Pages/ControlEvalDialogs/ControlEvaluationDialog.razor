@@ -1,6 +1,8 @@
 @using FinalYearProject.Models
 @using FinalYearProject.Enums
 @using FinalYearProject.Services
+@using Microsoft.AspNetCore.Authorization.Infrastructure
+@using System.IO
 @inject DatabaseContext DatabaseContext
 @inject ControlsService ControlsService
 @inject ISnackbar SnackBar
@@ -17,9 +19,12 @@ else
             <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.h4">Control Evaluation Builder - @dialogTitle</MudText>
             <MudDivider Class="my-3"/>
             <ControlsTable allControls="@allControls" />
-            <MudDivider Class="my-3"/>
-            <MudCard Elevation="3" Class="mb-3">
-                <MudGrid Justify="Justify.Center" Style="height: 300px">
+        <MudDivider Class="my-3"/>
+        <MudCard Elevation="3" Class="mb-3">
+            <MudGrid Justify="Justify.Center" Style="height: 300px">
+                
+                @if (ControlEval.ControlStage != ControlStage.Completed)
+                {
                     <MudItem xs="4">
                         <MudGrid Justify="Justify.Center" Style="Height:100%; flex-direction: column; align-items: center" Class="mb-5">
                             <MudItem>
@@ -40,35 +45,41 @@ else
                             </MudItem>
                         </MudGrid>
                     </MudItem>
-                    <MudItem xs="4">
-                        <MudTable Items="ControlEval.ControlsList" Dense="true" FixedHeader="true" Height="215px" Elevation="1">
-                            <ToolBarContent>
-                                <MudText Typo="Typo.h5" Style="font-weight: bold">Selected Controls</MudText>
-                            </ToolBarContent>
-                            <HeaderContent>
-                                <MudTh>Control ID</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd>@context.Control.Id</MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudItem>
-                </MudGrid>
+                }
+                
+                <MudItem xs=tableWidth>
+                    <MudTable Items="ControlEval.ControlsList" Dense="true" FixedHeader="true" Height="215px" Elevation="1">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h5" Style="font-weight: bold">Selected Controls</MudText>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh>Control ID</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Control.Id</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
             </MudCard>
         </DialogContent>
         <DialogActions>
-            <MudButton Size="Size.Large" OnClick="Exit" Color="Color.Dark" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Cancel</MudButton>
+            <MudButton Size="Size.Large" OnClick="Exit" Color="Color.Dark" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Exit</MudButton>
             @if (ControlEval.ControlStage == ControlStage.InProgress)
             {
                 <MudButton Size="Size.Large" OnClick="SendForReview" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Send For Review</MudButton>
             }
             @if (ControlEval.ControlStage == ControlStage.InReview)
             {
-                <AuthorizeView Roles=@Role.Reviewer.ToString()>
+                <AuthorizeView Roles="@(Role.Reviewer + "," + Role.Developer)">
                     <Authorized>
-                        <MudButton Size="Size.Large" OnClick="CompleteReview" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Send For Review</MudButton>
+                        <MudButton Size="Size.Large" OnClick="CompleteReview" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Complete Review</MudButton>
                     </Authorized>
                 </AuthorizeView>
+            }
+            @if (ControlEval.ControlStage == ControlStage.Completed)
+            {
+                <MudButton Size="Size.Large" OnClick="DownloadControlEvaluation" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="mr-3">Download</MudButton>
             }
         </DialogActions>
     </MudDialog>
@@ -87,6 +98,9 @@ else
     [Parameter]
     public string dialogTitle { get; set; }
 
+    [Parameter]
+    public int tableWidth { get; set; }
+    
     public int? controlIDAdd { get; set; }
     public int? controlIDRemove { get; set; }
     public List<Control> allControls = new List<Control>();
@@ -102,12 +116,14 @@ else
 
     async Task Exit()
     {
+        isLoading = true;
         await DatabaseContext.SaveChangesAsync();
         MudDialog.Close(DialogResult.Cancel());
     }
 
     async Task SendForReview()
     {
+        isLoading = true;
         ControlEval.ControlStage = ControlStage.InReview;
         await DatabaseContext.SaveChangesAsync();
         SnackBar.Add("Your control evaluation has been sent for review.", Severity.Success);
@@ -116,6 +132,7 @@ else
 
     async Task CompleteReview()
     {
+        isLoading = true;
         ControlEval.ControlStage = ControlStage.Completed;
         await DatabaseContext.SaveChangesAsync();
         SnackBar.Add("The control evaluation has been set as 'completed'.", Severity.Success);
@@ -129,13 +146,20 @@ else
             var currentControl = allControls.SingleOrDefault(x => x.Id == controlIDAdd);
             if (currentControl != null)
             {
-                if (!ControlEval.ControlsList.Any(x => x.Control.Id == controlIDAdd))
+                if (ControlEval.ControlsList != null)
                 {
-                    ControlEval.ControlsList.Add(new ControlEvaluationControls(){Control = currentControl});
+                    if ( !ControlEval.ControlsList.Any(x => x.Control.Id == controlIDAdd))
+                    {
+                        ControlEval.ControlsList.Add(new ControlEvaluationControls(){Control = currentControl});
+                    }
+                    else
+                    {
+                        SnackBar.Add("That control ID is already in use.", Severity.Warning);
+                    }
                 }
                 else
                 {
-                    SnackBar.Add("That control ID is already in use.", Severity.Warning);
+                    ControlEval.ControlsList.Add(new ControlEvaluationControls(){Control = currentControl});
                 }
             }
             else
@@ -168,5 +192,10 @@ else
         {
             SnackBar.Add("Something went wrong. Please try again.", Severity.Error);
         }
+    }
+
+    async Task DownloadControlEvaluation()
+    {
+        await ControlsService.CreateControlEvaluationDocument(ControlEval);
     }
 }

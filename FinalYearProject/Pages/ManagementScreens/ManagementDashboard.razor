@@ -1,7 +1,9 @@
 @page "/ManagementDashboard"
 @using FinalYearProject.Services
 @using FinalYearProject.Models
+@using FinalYearProject.Enums
 @inject UserService UserService
+@inject ControlsService ControlsService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @if (_isLoading)
 {
@@ -13,11 +15,11 @@ else
         <MudCard>
             <MudCardContent>
                 <MudTabs Color="Color.Primary" Rounded="true" Centered="true">
+                    <MudTabPanel Text="Control Evaluations for Review">
+                        <ReviewRequiredComponent InReviewControlEvaluations="@_inReviewControlEvaluations"/>
+                    </MudTabPanel>
                     <MudTabPanel Text="Registered Users">
                         <RegisteredUsers AllUsers="@_allUsers"/>
-                    </MudTabPanel>
-                    <MudTabPanel Text="Register User">
-                        <RegisterUser/>
                     </MudTabPanel>
                 </MudTabs>
             </MudCardContent>
@@ -30,6 +32,7 @@ else
     private User _user = new();
     private bool _isLoading;
     private List<User> _allUsers = new();
+    private List<ControlEvaluations> _inReviewControlEvaluations = new();
     
     protected override async Task OnInitializedAsync()
     {
@@ -39,10 +42,11 @@ else
 
         if (user.Identity.IsAuthenticated)
         {
-            _allUsers = await UserService.FetchAllUserProfiles();
+            _allUsers = await UserService.FetchAllUsersWithControlEval();
             _user = await UserService.FetchUserWithControlEval(user.Identity.Name);
+            _inReviewControlEvaluations = await ControlsService.FetchAllInReviewControlEvals();
+            _isLoading = false;
         }
-        _isLoading = false;
     }
 
 }

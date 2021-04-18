@@ -1,10 +1,16 @@
-﻿@inherits LayoutComponentBase
+﻿@using FinalYearProject.Enums
+@inherits LayoutComponentBase
 
 <MudNavMenu Class="pt-1">
     <AuthorizeView>
         <Authorized>
             <MudNavLink Href="/index" Icon="@Icons.Material.Filled.Home">Auditor Dashboard</MudNavLink>
-            <MudNavLink Href="/ManagementDashboard" Icon="@Icons.Material.Filled.Dashboard">Management Dashboard</MudNavLink>
+            <AuthorizeView Roles="@(Role.Reviewer + "," + Role.Developer)">
+                <Authorized Context="anotherName">
+                    <MudNavLink Href="/ManagementDashboard" Icon="@Icons.Material.Filled.Dashboard">Management Dashboard</MudNavLink>
+                </Authorized>
+            </AuthorizeView>
+            <MudNavLink Href="/EditAccount" Icon="@Icons.Material.Filled.AccountCircle">Edit Account</MudNavLink>
             <MudNavLink Href="/Logout" Icon="@Icons.Material.Filled.Logout">Log Out</MudNavLink>
         </Authorized>
     </AuthorizeView>

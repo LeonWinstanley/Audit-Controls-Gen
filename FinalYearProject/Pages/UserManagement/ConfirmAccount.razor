@@ -1,0 +1,42 @@
+@page "/ConfirmAccount/{UserId}/{Code}"
+@layout EmptyLayout
+@using System.Text
+@using FinalYearProject.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@inject UserManager<User> UserManager
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+    [Parameter]
+    public string Code { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var decodedUserId = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(UserId));
+            var user = await UserManager.FindByIdAsync(decodedUserId);
+            if (user == null)
+            {
+                Snackbar.Add($"Unable to load user with ID '{UserId}'.", Severity.Error);
+            }
+            var decodedCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+
+            var result = await UserManager.ConfirmEmailAsync(user, decodedCode);
+            if (!result.Succeeded)
+            {
+                Snackbar.Add("Error confirming account.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Account confirmed!", Severity.Success);
+            }
+        
+            NavigationManager.NavigateTo("/", true);
+        }
+    }
+
+}

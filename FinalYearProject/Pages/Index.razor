@@ -4,11 +4,11 @@
 @using FinalYearProject.Services
 @using FinalYearProject.Enums
 @using FinalYearProject.Pages.ControlEvalDialogs
-@using System.Runtime.CompilerServices
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService UserService
 @inject ControlsService ControlsService
 @inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 
 @if (_isLoading)
 {
@@ -112,7 +112,7 @@ else
                                         <MudItem xs="3">
                                             <MudText>Status: Completed</MudText>
                                         </MudItem>
-                                        <MudItem Style="height: 80%">
+                                        <MudItem xs="2" Style="height: 80%">
                                             <MudButton FullWidth="true" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OpenControlEvaluation(ControlEval)" Style="height: 100%">Open</MudButton>
                                         </MudItem>
                                     </MudGrid>
@@ -155,8 +155,7 @@ else
         if (!result.Cancelled)
         {
             Console.WriteLine("CreateNew");
-            await base.OnInitializedAsync();
-            StateHasChanged();
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
         }
     }
 
@@ -169,16 +168,20 @@ else
         if (ControlEval.ControlStage == ControlStage.InProgress)
         {
             parameters.Add("dialogTitle", "In Progress");
-            dialog = DialogService.Show<ControlEvaluationInProgressDialog>("",parameters,options);
+            parameters.Add("tableWidth", 4);
+            dialog = DialogService.Show<ControlEvaluationDialog>("",parameters,options);
         }
         else if (ControlEval.ControlStage == ControlStage.InReview)
         {
             parameters.Add("dialogTitle", "In Review");
-            dialog = DialogService.Show<ControlEvaluationInProgressDialog>("",parameters,options);
+            parameters.Add("tableWidth", 4);
+            dialog = DialogService.Show<ControlEvaluationDialog>("",parameters,options);
         }
         else if (ControlEval.ControlStage == ControlStage.Completed)
         {
-            dialog = DialogService.Show<ControlEvaluationCompletedDialog>("",parameters,options);
+            parameters.Add("dialogTitle", "Completed");
+            parameters.Add("tableWidth", 12);
+            dialog = DialogService.Show<ControlEvaluationDialog>("",parameters,options);
         }
         var result = await dialog.Result;
         if (!result.Cancelled)
