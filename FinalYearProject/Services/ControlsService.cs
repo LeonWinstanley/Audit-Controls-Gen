@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+using MudBlazor;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using Color = Syncfusion.Drawing.Color;
 
 namespace FinalYearProject.Services
 {
@@ -66,45 +70,71 @@ namespace FinalYearProject.Services
 
         public async Task CreateControlEvaluationDocument(ControlEvaluations controlEvaluation)
         {
-            Word.Application application = new();
-        
-            application.ShowAnimation = false;
-            application.Visible = false;
-
-            object missing = System.Reflection.Missing.Value;
-            
             const string templateUrl = "WordTemplate/Control_Evaluation.doc";
             string controlName = $"ControlEvaluation-{controlEvaluation.AuditName}";
             string controlUrl = $"WordControlEvaluations/{controlName}";
-            Word.Document templateDocument = application.Documents.Open(templateUrl);
-
-            templateDocument = ReplaceBookmarkText(templateDocument, "headerAuditor", controlEvaluation.LeadAuditor);
-            templateDocument = ReplaceBookmarkText(templateDocument, "headerDateCreated", DateTimeOffset.Now.ToString());
-            templateDocument = ReplaceBookmarkText(templateDocument, "headerJobName", controlEvaluation.AuditName);
-            templateDocument = ReplaceBookmarkText(templateDocument, "headerJobRef", controlEvaluation.Id.ToString());
             
-            templateDocument.SaveAs(controlUrl);
+            WordDocument wordDocument = new WordDocument();
+            FileStream fileStreamPath =
+                new FileStream($@"{templateUrl}", FileMode.Open, FileAccess.Read, FileShare.Write);
+            wordDocument.Open(fileStreamPath, FormatType.Automatic);
 
-            await _jsRuntime.InvokeAsync<object>("FileSaveAs", controlUrl, controlName);
+            InsertHeadingsDocument(new BookmarksNavigator(wordDocument), controlEvaluation);
+            InsertControlTableDocument(wordDocument.Sections[0], controlEvaluation);
+            
+            MemoryStream stream = new MemoryStream();
+            wordDocument.Save(stream, FormatType.Docx);
+
+            wordDocument.Close();
+            stream.Position = 0;
+
+            await _jsRuntime.SaveAs("ControlEvaluation.docx", stream.ToArray());
         }
 
-        private Word.Document ReplaceBookmarkText(Word.Document document, string bookmarkName, string textToReplace)
+        private void InsertHeadingsDocument(BookmarksNavigator bookmarksNavigator, ControlEvaluations controlEvaluation)
         {
-            if (document.Bookmarks.Exists(bookmarkName))
-            {
-                Object name = bookmarkName;
-                Word.Range range = document.Bookmarks.get_Item(ref name).Range;
-
-                range.Text = textToReplace;
-
-                object newRange = range;
-                document.Bookmarks.Add(bookmarkName, ref newRange);
-
-                return document;
-            }
-
-            return document;
+            bookmarksNavigator.MoveToBookmark("headerAuditor");
+            bookmarksNavigator.InsertText(controlEvaluation.LeadAuditor);
+            bookmarksNavigator.MoveToBookmark("headerDateCreated");
+            bookmarksNavigator.InsertText(DateTimeOffset.Now.ToString("d"));
+            bookmarksNavigator.MoveToBookmark("headerJobName");
+            bookmarksNavigator.InsertText(controlEvaluation.AuditName);
+            bookmarksNavigator.MoveToBookmark("headerJobRef");
+            bookmarksNavigator.InsertText(controlEvaluation.Id.ToString());
         }
 
+        private void InsertControlTableDocument(WSection section, ControlEvaluations controlEvaluation)
+        {
+            var table = section.Tables[0] as WTable;
+            int reference = 1;
+            if (table == null)
+            {
+                throw new Exception("An error has occurred. Please try again.");
+            }
+            foreach (var controlList in controlEvaluation.ControlsList)
+            {
+                reference = InsertRowIntoTable(table.AddRow(), controlList.Control, reference);
+            }
+            
+        }
+
+        private int InsertRowIntoTable(WTableRow row, Control control, int reference)
+        {
+            var cellCollection = row.Cells;
+            row.RowFormat.BackColor = Color.White;
+            ChangeFontDetails(cellCollection[0].AddParagraph().AppendText(reference.ToString()));
+            ChangeFontDetails(cellCollection[1].AddParagraph().AppendText(control.ControlSummary));
+            ChangeFontDetails(cellCollection[2].AddParagraph().AppendText(control.ControlExpected));
+            ChangeFontDetails(cellCollection[3].AddParagraph().AppendText(control.ControlTest));
+            return ++reference; 
+        }
+
+        private void ChangeFontDetails(
+            IWTextRange textRange, string font = "Century Gothic", int fontSize = 10, bool bold = false)
+        {
+            textRange.CharacterFormat.FontName = font;
+            textRange.CharacterFormat.FontSize = fontSize;
+            textRange.CharacterFormat.Bold = bold;
+        }
     }
 }
